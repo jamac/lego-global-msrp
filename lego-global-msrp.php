@@ -308,5 +308,3 @@ Notes:
 		}
 
 	}
-
-	print(PHP_EOL . 'Generated: ' . date('r') . PHP_EOL);
