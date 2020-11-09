@@ -38,7 +38,7 @@ Notes:
 /* ************************************************************************** */
 // Collect details from LEGO.com
 
-	$sleepTime = 5;
+	$sleepTime = 10;
 
 	$headersPrinted = false;
 	$urlPattern = 'https://www.lego.com/%s/product/%s';
@@ -248,22 +248,24 @@ Notes:
 		'product:price:amount',
 		'product:price:currency',
 		'computed:locale',
+		'computed:locale:vat',
 		'computed:price',
 		'computed:price:novat',
 		'computed:currency',
-		'computed:rate',
+		'computed:currency:rate',
 	);
 
 	foreach ($itemIDs as $itemID) {
 
 		foreach ($countryIDs as $countryID => $country) {
 
-			$country['vat'] += 1;
-
 			$details = array(
 				'computed:itemid' => $itemID,
 				'computed:locale' => $country['name'],
+				'computed:locale:vat' => $country['vat'],
 			);
+
+			$country['vat'] += 1;
 
 			// Load URL and apply UTF-8 hack for DomDocument
 			$html = file_get_contents(sprintf($urlPattern, $countryID, $itemID));
@@ -289,11 +291,11 @@ Notes:
 			$details['computed:price'] = 'N/A';
 			$details['computed:price:novat'] = 'N/A';
 			$details['computed:currency'] = $baseCurrencyID;
-			$details['computed:rate'] = 'N/A';
+			$details['computed:currency:rate'] = 'N/A';
 			if ($details['product:price:amount'] && $currencies[$details['product:price:currency']]) {
 				$details['computed:price'] = number_format($details['product:price:amount'] / $currencies[$details['product:price:currency']], 2);
 				$details['computed:price:novat'] = number_format($details['computed:price'] / $country['vat'], 2);
-				$details['computed:rate'] = number_format(1 / $currencies[$details['product:price:currency']], 4);
+				$details['computed:currency:rate'] = number_format(1 / $currencies[$details['product:price:currency']], 4);
 			}
 
 			if (!$headersPrinted) {
