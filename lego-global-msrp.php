@@ -49,6 +49,7 @@ Notes:
 		75318, // The Child (Star Wars)
 		75978, // Diagon Alley (Harry Potter)
 		76161, // 1989 Batwing (DC)
+		71395, // Super Mario 64 Question Mark Block
 	);
 
 	// Cherry picking English were possible
