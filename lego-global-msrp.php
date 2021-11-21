@@ -241,9 +241,6 @@ Notes:
 
 	// The bits we want to collect
 	$properties = array(
-		'og:title',
-		'og:description',
-		'og:url',
 		'og:locale',
 		'product:availability',
 		'product:price:amount',
@@ -254,6 +251,8 @@ Notes:
 		'computed:price:novat',
 		'computed:currency',
 		'computed:currency:rate',
+		'og:title',
+		'og:url',
 	);
 
 	foreach ($itemIDs as $itemID) {
