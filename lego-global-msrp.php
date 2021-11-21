@@ -297,6 +297,10 @@ Notes:
 				$details['computed:price:novat'] = number_format($details['computed:price'] / $country['vat'], 2);
 				$details['computed:currency:rate'] = number_format(1 / $currencies[$details['product:price:currency']], 4);
 			}
+			// Strip out the shop at lego bits
+			if ($details['og:title']) {
+				$details['og:title'] = trim(reset(explode('|', $details['og:title'])));
+			}
 
 			if (!$headersPrinted) {
 				$headersPrinted = true;
