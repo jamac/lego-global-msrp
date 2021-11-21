@@ -9,10 +9,28 @@ Notes:
 */
 
 /* ************************************************************************** */
-// Build currency conversion data
+// Process Configuration
 
-	$baseCurrencyID = 'USD';
-	$currencyURL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
+	$iniFile = "config.ini";
+	$iniFileDefault = "default.config.ini";
+
+	if (!file_exists($iniFile) || !is_readable($iniFile)) {
+		fwrite(STDERR, 'Not Configured.' . PHP_EOL);
+		fwrite(STDERR, 'Rename ' . $iniFileDefault . ' to ' . $iniFile . ' and alter item IDs, base currency, etc. as needed.' . PHP_EOL);
+		exit(1);
+	}
+
+	$config = parse_ini_file('./' . $iniFile, TRUE);
+
+	$baseCurrencyID = $config['config']['basecurrency'];
+	$sleepTime = $config['config']['sleeptime'];
+	$currencyURL = $config['urls']['currency'];
+	$urlPattern = $config['urls']['product'];
+	$itemids = array_filter($config['sets']['itemids']);
+	$locales = $config['locales'];
+
+/* ************************************************************************** */
+// Build currency conversion data
 
 	$currencyString = file_get_contents($currencyURL);
 	$currencyXML = new SimpleXMLElement($currencyString);
@@ -38,207 +56,6 @@ Notes:
 /* ************************************************************************** */
 // Collect details from LEGO.com
 
-	$sleepTime = 10;
-
-	$headersPrinted = false;
-	$urlPattern = 'https://www.lego.com/%s/product/%s';
-
-	$itemIDs = array(
-		21324, // Sesame Street (Ideas)
-		60197, // Passenger Train (City)
-		75318, // The Child (Star Wars)
-		75978, // Diagon Alley (Harry Potter)
-		76161, // 1989 Batwing (DC)
-		71395, // Super Mario 64 Question Mark Block
-	);
-
-	// Cherry picking English were possible
-	$countryIDs = array(
-
-		// North America
-		'en-ca' => array(
-			'name' => 'Canada',
-			'vat' => 0.0,
-		),
-		'en-mx' => array(
-			'name' => 'Mexico',
-			'vat' => 0.0,
-		),
-		'en-us' => array(
-			'name' => 'United States',
-			'vat' => 0.0,
-		),
-
-		// South America
-
-		// Europe
-		'en-be' => array(
-			'name' => 'Belgium',
-			'vat' => 0.21,
-		),
-		'en-cz' => array(
-			'name' => 'Czech Republic',
-			'vat' => 0.21,
-		),
-		'en-dk' => array(
-			'name' => 'Denmark',
-			'vat' => 0.25,
-		),
-		'en-de' => array(
-			'name' => 'Germany',
-			'vat' => 0.19,
-		),
-		'en-ee' => array(
-			'name' => 'Estonia',
-			'vat' => 0.20,
-		),
-		'en-es' => array(
-			'name' => 'Spain',
-			'vat' => 0.21,
-		),
-		'en-fi' => array(
-			'name' => 'Finland',
-			'vat' => 0.24,
-		),
-		'en-fr' => array(
-			'name' => 'France',
-			'vat' => 0.20,
-		),
-		'en-gr' => array(
-			'name' => 'Greece',
-			'vat' => 0.24,
-		),
-		'en-hu' => array(
-			'name' => 'Hungary',
-			'vat' => 0.27,
-		),
-		'en-ie' => array(
-			'name' => 'Ireland',
-			'vat' => 0.23,
-		),
-		'en-it' => array(
-			'name' => 'Italy',
-			'vat' => 0.22,
-		),
-		'en-lv' => array(
-			'name' => 'Latvia',
-			'vat' => 0.21,
-		),
-		'en-lt' => array(
-			'name' => 'Lithuania',
-			'vat' => 0.21,
-		),
-		'en-lu' => array(
-			'name' => 'Luxemburg',
-			'vat' => 0.17,
-		),
-		'en-nl' => array(
-			'name' => 'Netherlands',
-			'vat' => 0.21,
-		),
-		'en-no' => array(
-			'name' => 'Norway',
-			'vat' => 0.25,
-		),
-		'en-at' => array(
-			'name' => 'Austria',
-			'vat' => 0.20,
-		),
-		'en-pl' => array(
-			'name' => 'Poland',
-			'vat' => 0.23,
-		),
-		'en-pt' => array(
-			'name' => 'Portugal',
-			'vat' => 0.23,
-		),
-		'en-ch' => array(
-			'name' => 'Switzerland',
-			'vat' => 0.077,
-		),
-		'en-si' => array(
-			'name' => 'Slovenia',
-			'vat' => 0.22,
-		),
-		'en-sk' => array(
-			'name' => 'Slovakia',
-			'vat' => 0.20,
-		),
-		'en-se' => array(
-			'name' => 'Sweden',
-			'vat' => 0.25,
-		),
-		'en-gb' => array(
-			'name' => 'United Kingdom',
-			'vat' => 0.20,
-		),
-
-		// Asia Pacific
-		'en-au' => array(
-			'name' => 'Australia',
-			'vat' => 0.0,
-		),
-		'en-nz' => array(
-			'name' => 'New Zealand',
-			'vat' => 0.0,
-		),
-		'ko-kr' => array(
-			'name' => 'Korea',
-			'vat' => 0.0,
-		),
-
-		// Middle East & Africa
-
-		/*
-		// Disabled - Do not appear to list price
-		'pt-br' => array(
-			'name' => 'Brasil',
-			'vat' => 0.0,
-		),
-		'zh-cn' => array(
-			'name' => 'China',
-			'vat' => 0.0,
-		),
-		'en-in' => array(
-			'name' => 'India',
-			'vat' => 0.0,
-		),
-		'ja-jp' => array(
-			'name' => 'Japan',
-			'vat' => 0.0,
-		),
-		'es-ar' => array(
-			'name' => 'Latin America',
-			'vat' => 0.0,
-		),
-		'en-my' => array(
-			'name' => 'Malaysia',
-			'vat' => 0.0,
-		),
-		'ru-ru' => array(
-			'name' => 'Russia',
-			'vat' => 0.0,
-		),
-		'en-sg' => array(
-			'name' => 'Singapore',
-			'vat' => 0.0,
-		),
-		'en-za' => array(
-			'name' => 'South Africa',
-			'vat' => 0.0,
-		),
-		'tr-tr' => array(
-			'name' => 'Turkey',
-			'vat' => 0.0,
-		),
-		'en-ae' => array(
-			'name' => 'United Arab Emirates',
-			'vat' => 0.0,
-		),
-		*/
-
-	);
-
 	// The bits we want to collect
 	$properties = array(
 		'og:locale',
@@ -255,20 +72,22 @@ Notes:
 		'og:url',
 	);
 
-	foreach ($itemIDs as $itemID) {
+	$headersPrinted = false;
 
-		foreach ($countryIDs as $countryID => $country) {
+	foreach ($itemids as $itemID) {
+
+		foreach ($locales as $localeID => $locale) {
 
 			$details = array(
 				'computed:itemid' => $itemID,
-				'computed:locale' => $country['name'],
-				'computed:locale:vat' => $country['vat'],
+				'computed:locale' => $locale['name'],
+				'computed:locale:vat' => $locale['vat'],
 			);
 
-			$country['vat'] += 1;
+			$locale['vat'] += 1;
 
 			// Load URL and apply UTF-8 hack for DomDocument
-			$html = file_get_contents(sprintf($urlPattern, $countryID, $itemID));
+			$html = file_get_contents(sprintf($urlPattern, $localeID, $itemID));
 			$html = str_replace('<head>', '<head><meta http-equiv="content-type" content="text/html; charset=utf-8">', $html);
 
 			$doc = new DomDocument();
@@ -294,7 +113,7 @@ Notes:
 			$details['computed:currency:rate'] = 'N/A';
 			if ($details['product:price:amount'] && $currencies[$details['product:price:currency']]) {
 				$details['computed:price'] = number_format($details['product:price:amount'] / $currencies[$details['product:price:currency']], 2);
-				$details['computed:price:novat'] = number_format($details['computed:price'] / $country['vat'], 2);
+				$details['computed:price:novat'] = number_format($details['computed:price'] / $locale['vat'], 2);
 				$details['computed:currency:rate'] = number_format(1 / $currencies[$details['product:price:currency']], 4);
 			}
 			// Strip out the shop at lego bits
