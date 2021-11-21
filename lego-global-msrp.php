@@ -3,7 +3,7 @@
 /*
 Notes:
 - Inital EU VAT rates collected from https://vatdesk.eu/
-- I'm no expert on VAT, some of the rate could be wildly inaccurate.
+- I'm no expert on VAT, some of the rates could be wildly inaccurate.
 - Outputs CSV. Pipe to file if needed (ie php lego-global-msrp.php > prices.csv)
 - Only considers prices found on Lego.com.
 */
