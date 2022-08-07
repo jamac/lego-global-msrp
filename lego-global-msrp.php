@@ -1,29 +1,20 @@
 <?php
 
 /*
-Notes:
-- Inital EU VAT rates collected from https://vatdesk.eu/
-- I'm no expert on VAT, some of the rates could be wildly inaccurate.
-- Outputs CSV. Pipe to file if needed (ie php lego-global-msrp.php > prices.csv)
-- Only considers prices found on Lego.com.
+********************************************************************************
+	Notes:
+	- Inital EU VAT rates collected from https://vatdesk.eu/
+	- I'm no expert on VAT, some of the rates could be wildly inaccurate.
+	- Outputs CSV. Pipe to file if needed (ie php lego-global-msrp.php > prices.csv)
+	- Only considers prices found on Lego.com.
+********************************************************************************
 */
 
-/* ************************************************************************** */
 // Process Configuration
-
-	$iniFile = "config.ini";
-	$iniFileDefault = "default.config.ini";
-
-	if (!file_exists($iniFile) || !is_readable($iniFile)) {
-		fwrite(STDERR, 'Not Configured.' . PHP_EOL);
-		fwrite(STDERR, 'Rename ' . $iniFileDefault . ' to ' . $iniFile . ' and alter item IDs, base currency, etc. as needed.' . PHP_EOL);
-		exit(1);
-	}
-
-	$config = parse_ini_file('./' . $iniFile, TRUE);
+	require("./config.php");
 
 	$baseCurrencyID = $config['config']['basecurrency'];
-	$sleepTime = $config['config']['sleeptime'];
+	$pageSleep = $config['config']['pagesleep'];
 	$currencyURL = $config['urls']['currency'];
 	$urlPattern = $config['urls']['product'];
 	$itemids = array_filter($config['sets']['itemids']);
@@ -87,7 +78,8 @@ Notes:
 			$locale['vat'] += 1;
 
 			// Load URL and apply UTF-8 hack for DomDocument
-			$html = file_get_contents(sprintf($urlPattern, $localeID, $itemID));
+			$url = sprintf($urlPattern, $localeID, $itemID);
+			$html = file_get_contents($url);
 			$html = str_replace('<head>', '<head><meta http-equiv="content-type" content="text/html; charset=utf-8">', $html);
 
 			$doc = new DomDocument();
@@ -128,7 +120,7 @@ Notes:
 
 			print('"' . implode('","', array_values($details)) . '"' . PHP_EOL);
 
-			sleep($sleepTime);
+			sleep($pageSleep);
 
 		}
 

@@ -1,7 +1,1 @@
-# Ignore everything
-/*
-
-# Add tracked files
-!/.gitignore
-!/lego-global-msrp.php
-!/default.config.ini
+config.ini
